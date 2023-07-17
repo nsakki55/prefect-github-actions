@@ -1,23 +1,10 @@
-# Prefect GitHub Actions
+name: Run register prefect deployments
 
-GitHub Actions to automatically register deployments with Prefect Cloud.
+on:
+  push:
+    branches:
+      - main
 
-This workflow registers deployments created under the `deployments` folder to Prefect Cloud in parallel.
-
-# GitHub Secrets
-
-This GitHub Actions workflow uses the following Secrets in this repository:
-
-- [PREFECT_API_URL](https://docs.prefect.io/2.10.21/concepts/settings/#prefect_api_url)
-- [PREFECT_API_KEY](https://docs.prefect.io/2.10.21/concepts/settings/#prefect_api_key)
-
-# GitHub Actions Details
-
-## List deployment files
-
-This job retrieves a list of deployment files located in the `deployments` folder.
-
-```yaml
 jobs:
   list-deployments:
     name: List prefect deployments
@@ -30,17 +17,7 @@ jobs:
       - id: set-matrix
         run: |
             echo "deployments=$(ls deployments/*.py | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
-```
 
-## Register deployment files
-
-This job registers the deployments with Prefect Cloud in parallel.
-
-It sets the `PYTHONPATH` environment variable to execute python files in the `deployments` folder from `prefect-github-actions`.
-
-`PYTHONPATH: :///home/runner/work/prefect-github-actions`
-
-```yaml
   deploy:
     name: Deploy
     needs: list-deployments
@@ -68,4 +45,3 @@ It sets the `PYTHONPATH` environment variable to execute python files in the `de
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         run: |
           python ${{ matrix.deployments }}
-```
